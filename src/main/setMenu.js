@@ -26,6 +26,7 @@ function setMenu() {
         {
             label: "表示",
             submenu: [
+                {label: "スライドの表示", accelerator: "F5", click: () => showSlide()},
                 {
                     label: "更新",
                     accelerator: "CmdOrCtrl+R",
@@ -57,7 +58,7 @@ function setMenu() {
 function requestText() {
     return new Promise((resolve) => {
         BrowserWindow.getFocusedWindow().webContents.send("REQUEST_TEXT");
-        //console.log("request send");
+        console.log("request send");
         ipcMain.once("REPLY_TEXT", (event, arg) => {
             //console.log(arg);
             resolve(arg);
