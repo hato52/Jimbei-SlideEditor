@@ -1,7 +1,13 @@
 const {Menu, BrowserWindow, dialog, ipcMain} = require("electron");
 const fs = require("fs");
+const setSlideMenu = require("./setSlideMenu.js");
 
 let currentPath;
+let slideWindow;
+
+ipcMain.on("REPLY_SLIDETEXT_FROM_MAIN", (event, arg) => {
+    slideWindow.webContents.send("SEND_SLIDETEXT", arg);
+});
 
 function setMenu() {
     const menu = [
@@ -27,6 +33,7 @@ function setMenu() {
             label: "表示",
             submenu: [
                 {label: "スライドの表示", accelerator: "F5", click: () => showSlide()},
+                {label: "全画面表示の切り替え", accelerator: "F11", click: () => toggleFullScreen()},
                 {
                     label: "更新",
                     accelerator: "CmdOrCtrl+R",
@@ -53,6 +60,26 @@ function setMenu() {
     }
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
+}
+
+function toggleFullScreen() {
+    let focusedWindow = BrowserWindow.getFocusedWindow();
+
+    if(focusedWindow.isFullScreen()) {
+        focusedWindow.setMenuBarVisibility(true);
+        focusedWindow.setFullScreen(false);
+    }else{
+        focusedWindow.setMenuBarVisibility(false);
+        focusedWindow.setFullScreen(true);
+    }
+}
+
+function showSlide() {
+    slideWindow = new BrowserWindow({width: 800, height: 600});
+    slideWindow.loadURL('file://' + __dirname + "/../../lib/reveal/index.html");
+    slideWindow.on('closed', () => {
+        slideWindow = null;
+    });
 }
 
 function requestText() {

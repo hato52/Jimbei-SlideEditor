@@ -1,8 +1,12 @@
-const {app, BrowserWindow} = require('electron');
+const {app, BrowserWindow, ipcMain} = require('electron');
+const setMenu = require('./setMenu.js');
 
 let mainWindow;
 
-let setMenu = require('./setMenu.js');
+//スライド表示用のテキストリクエストを送信
+ipcMain.on("REQUEST_SLIDETEXT", (event, arg) => {
+    mainWindow.webContents.send("REQUEST_SLIDETEXT_TO_MAIN");
+});
 
 app.on('window-all-closed', () => {
     if(process.platform != 'darwin') {
