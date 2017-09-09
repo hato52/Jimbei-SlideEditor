@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset='UTF-8'>
+        <title>テーマ設定</title>
+        <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css"> 
+        <script>
+            window.nodeRequire = require;
+            delete window.require;
+            delete window.exports;
+            delete window.module;
+        </script>
+        <script src="lib/vue.js"></script>
+        <script src="lib/jquery-3.2.1.min.js"></script>
+        <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <form action="">
+                <h5>テーマ設定</h5>
+                <hr>
+                <div >
+                    <label>テーマ: </label>
+                    <select id="select_theme" name="theme">
+                        <option value="beige.css">beige</option>
+                        <option value="black.css">black</option>
+                        <option value="blood.css">blood</option>
+                        <option value="league.css">league</option>
+                        <option value="moon.css">moon</option>
+                        <option value="night.css">night</option>
+                        <option value="serif.css">serif</option>
+                        <option value="simple.css">simple</option>
+                        <option value="sky.css">sky</option>
+                        <option value="solarized.css">solarized</option>
+                        <option value="white.css">white</option>
+                    </select>
+                </div>    
+                <div class="form-group">
+                    <label>アニメーション: </label>
+                    <select id="select_anim" name="animation">
+                        <option value="slide">Slide</option>
+                        <option value="fade">Fade</option>
+                        <option value="none">None</option>
+                        <option value="convex">Convex</option>
+                        <option value="concave">Concave</option>
+                        <option value="zoom">Zoom</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="option-button">
+                    <button v-on:click="cancel" class="btn btn-default" type="button">キャンセル</button>
+                    <button v-on:click="apply" class="btn btn-primary" type="button">適用</button>
+                </div>
+
+                <script src="src/renderer/option_render.js"></script>
+            </form>            
+        </div>
+    </body>
+</html>

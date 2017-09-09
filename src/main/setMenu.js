@@ -4,9 +4,32 @@ const setSlideMenu = require("./setSlideMenu.js");
 
 let currentPath;
 let slideWindow;
+let optionWindow;
+let pdfWindow;
 
+//スライドテキストをスライドウィンドウに送信する
 ipcMain.on("REPLY_SLIDETEXT_FROM_MAIN", (event, arg) => {
     slideWindow.webContents.send("SEND_SLIDETEXT", arg);
+});
+
+//オプションをスライドウィンドウに送信する
+ipcMain.on("REQUEST_OPTION", (event, arg) => {
+    let option = JSON.parse(fs.readFileSync( __dirname + '/../../option.json', 'utf8', (err) => {
+        if (err) {
+            return console.log(err);
+        }
+    }));
+    slideWindow.webContents.send("SEND_OPTION", option.theme, option.animation);
+});
+
+//現在のオプションをオプションウィンドウに送信する
+ipcMain.on("REQUEST_NOW_OPTION", (event, arg) => {
+    let option = JSON.parse(fs.readFileSync( __dirname + '/../../option.json', 'utf8', (err) => {
+        if (err) {
+            return console.log(err);
+        }
+    }));
+    optionWindow.webContents.send("SEND_NOW_OPTION", option.theme, option.animation);
 });
 
 function setMenu() {
@@ -45,6 +68,12 @@ function setMenu() {
                     click: () => { BrowserWindow.getFocusedWindow().toggleDevTools(); }
                 }
             ]
+        },
+        {
+            label: "設定",
+            submenu: [
+                {label: "テーマ設定", accelerator: "CmdOrCtrl+Alt+O", click: () => showOption()}
+            ]
         }
     ];
 
@@ -62,6 +91,21 @@ function setMenu() {
     Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }
 
+function showOption() {
+    optionWindow = new BrowserWindow({
+        width: 300,
+        height: 300,
+        /*webPreferences: {
+            nodeIntegration: false
+        }*/
+    });
+    optionWindow.setMenuBarVisibility(false);
+    optionWindow.loadURL('file://' + __dirname + "/../../option.html");
+    optionWindow.on('closed', () => {
+        optionWindow = null;
+    });
+}
+
 function toggleFullScreen() {
     let focusedWindow = BrowserWindow.getFocusedWindow();
 
@@ -75,7 +119,13 @@ function toggleFullScreen() {
 }
 
 function showSlide() {
-    slideWindow = new BrowserWindow({width: 800, height: 600});
+    slideWindow = new BrowserWindow({
+        width: 800, 
+        height: 600,
+        //webPreferences: {
+        //    nodeIntegration: false
+        //}
+    });
     slideWindow.loadURL('file://' + __dirname + "/../../lib/reveal/index.html");
     slideWindow.on('closed', () => {
         slideWindow = null;
@@ -102,6 +152,17 @@ function saveFile(filename, arg) {
             }
         });
         currentPath = filename;
+        resolve();
+    });
+}
+
+function savePDF(filename, pdf) {
+    return new Promise((resolve) => {
+        fs.writeFileSync(filename, pdf, 'utf8', (err) => {
+            if(err) {
+                return console.log(err);
+            }
+        });
         resolve();
     });
 }
@@ -152,8 +213,8 @@ function saveAsNewFile() {
         {
             title: "名前を付けて保存",
             filters: [
-                {name: "markdown file", extensions: ["md"]},
-                {name: "All Files", extensions: ["*"]}
+                {name: "markdownファイル", extensions: ["md"]},
+                {name: "全てのファイル", extensions: ["*"]}
             ]
         },
         (filename) => {
@@ -169,7 +230,39 @@ function saveAsNewFile() {
 }
 
 function exportPDF() {
-    console.log("exportPDF");
+    console.log("export PDF");
+    slideWindow = new BrowserWindow({width: 800, height: 600});
+    slideWindow.loadURL('file://' + __dirname + "/../../lib/reveal/index.html?print-pdf/");
+
+    slideWindow.webContents.on("did-finish-load", () => {
+        console.log("finish load pdf window");
+        slideWindow.webContents.printToPDF({}, (err, pdf) => {
+            if (err) {
+                return console.log(err);
+            }
+            dialog.showSaveDialog(
+                BrowserWindow.getFocusedWindow(),
+                {
+                    title: "PDF形式で保存",
+                    filters: [
+                        {name: "PDFファイル", extensions: ["pdf"]}
+                    ]
+                },
+                (filename) => {
+                    if(filename) {
+                        savePDF(filename, pdf)
+                        .then(() => {
+                            slideWindow.close();
+                        })
+                        .then(() => {
+                            console.log("close pdf window");
+                        })
+                    }
+                }
+            );
+        });
+    });
+    //console.log("exportPDF");
 }
 
 module.exports = () => {
