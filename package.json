@@ -7,5 +7,14 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "bluetooth-serial-port": "^2.1.5",
+    "electron": "^1.7.9"
+  },
+  "devDependencies": {
+    "electron-packager": "^9.1.0",
+    "electron-rebuild": "^1.6.0",
+    "rcedit": "^0.9.0"
+  }
 }

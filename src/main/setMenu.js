@@ -1,9 +1,11 @@
 const {Menu, BrowserWindow, dialog, ipcMain} = require("electron");
+const btSerial = new (require("bluetooth-serial-port")).BluetoothSerialPort();
 const fs = require("fs");
 const setSlideMenu = require("./setSlideMenu.js");
+//const reveal = require("./../../lib/reveal/js/reveal");
 
 let currentPath;
-let slideWindow;
+var slideWindow;
 let optionWindow;
 let pdfWindow;
 
@@ -72,7 +74,8 @@ function setMenu() {
         {
             label: "設定",
             submenu: [
-                {label: "テーマ設定", accelerator: "CmdOrCtrl+Alt+O", click: () => showOption()}
+                {label: "テーマ設定", accelerator: "CmdOrCtrl+Alt+O", click: () => showOption()},
+		        {label: "プレゼンモードの開始", accelerator: "CmdOrCtrl+Alt+P", click: () => connectBTServer()}
             ]
         }
     ];
@@ -263,6 +266,36 @@ function exportPDF() {
         });
     });
     //console.log("exportPDF");
+}
+
+function connectBTServer() {
+    console.log("start search device");
+
+    btSerial.on("found", (address, name) => {  
+                        
+        console.log("address: " + address + " name: " + name);
+
+        btSerial.findSerialPortChannel(address, (channel) => {  //シリアルポートを探索
+            btSerial.connect(address, channel, () => {          //見つかったら接続
+                console.log("connected!");
+
+                btSerial.on("data", (buffer) => {
+                    console.log(buffer.toString("utf-8"));
+                    slideWindow.webContents.send("PUSH_KEY", buffer);
+                });
+            }, () => {
+                //connectのエラーコールバック
+                console.log("cannot connect");
+            });
+
+            btSerial.close();
+        }, () => {
+            //findSerialPortChannelのエラーコールバック
+            console.log("found nothing");
+        });
+    });
+    
+    btSerial.inquire();
 }
 
 module.exports = () => {

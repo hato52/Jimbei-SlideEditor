@@ -34,6 +34,6 @@ function toggleFullScreen() {
     } 
 }
 
-module.exports = () => {
-    setSlideMenu();
-} 
+//module.exports = () => {
+//    setSlideMenu();
+//} 
