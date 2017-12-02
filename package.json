@@ -1,0 +1,21 @@
+{
+  "name": "opencvtest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "res/main/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "electron-rebuild": "^1.6.0",
+    "node-opencv": "0.0.2-security",
+    "node-pre-gyp": "^0.6.39"
+  },
+  "devDependencies": {
+    "electron": "^1.7.9",
+    "node-gyp": "^3.6.2",
+    "opencv": "^6.0.0"
+  }
+}
